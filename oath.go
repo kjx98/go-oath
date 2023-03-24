@@ -8,7 +8,9 @@ import (
 	"time"
 )
 
-var interval int64 = 30
+const (
+	Interval int64 = 30
+)
 
 type Oath struct {
 	secret []byte
@@ -45,13 +47,13 @@ func (totp *Oath) Rfc(numb uint64) int {
 
 // return TOTP
 func (totp *Oath) Now() int {
-	tt := time.Now().UTC().Unix() / interval
+	tt := time.Now().UTC().Unix() / Interval
 	return totp.Rfc(uint64(tt))
 }
 
 // return TOTP
 func TOTP(key []byte) int {
-	tt := time.Now().UTC().Unix() / interval
+	tt := time.Now().UTC().Unix() / Interval
 	msg := make([]byte, 8)
 	binary.BigEndian.PutUint64(msg, uint64(tt))
 	return calcOTP(msg, key)

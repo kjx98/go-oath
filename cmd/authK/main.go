@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/kjx98/go-ncurses"
+	"github.com/kjx98/go-oath"
 	"github.com/op/go-logging"
 	"io"
 	"os"
@@ -50,6 +51,7 @@ func main() {
 	//os.Exit(0)
 	running := true
 	w, _ := ncurses.Initscr()
+	defer ncurses.Endwin()
 	defer func() {
 		if r := recover(); r != nil {
 			ncurses.Endwin()
@@ -119,7 +121,7 @@ func main() {
 		}()
 	}
 	ts := time.Now()
-	lastOtpSec := int64(0)
+	bFirst := true
 	for running {
 		tNow := time.Now()
 		tNowS := tNow.Format("01-02 15:04:05")
@@ -128,17 +130,17 @@ func main() {
 		w.Move(0, 40)
 		w.Write([]byte(tNowS))
 		w.Move(0, 56)
-		fmt.Fprintf(w, "UpTime: %02d:%02d:%02d.%03d", int(tRun.Hours()),
-			int(tRun.Minutes())%60, int(tRun.Seconds())%60,
-			int(tRun.Seconds()*1000)%1000)
+		fmt.Fprintf(w, "UpTime: %02d:%02d:%02d", int(tRun.Hours()),
+			int(tRun.Minutes())%60, int(tRun.Seconds())%60)
 		if cha := w.Getch(); cha == 'q' || cha == 'Q' || cha == 'x' {
 			break
 		}
-		if nowS := tNow.Unix(); lastOtpSec != 0 && nowS%60 != 0 {
+		if nowS := tNow.Unix(); !bFirst && nowS%oath.Interval != 0 {
+			time.Sleep(time.Millisecond * 100)
 			runtime.Gosched()
 			continue
 		} else {
-			lastOtpSec = nowS
+			bFirst = false
 		}
 		for i := 0; i < nSymbols; i++ {
 			w1.Move(uint16(i), 0)
@@ -148,9 +150,9 @@ func main() {
 			//w1.SetColor("wb")
 			w1.Write(printOtp(&accts[i]))
 		}
+		time.Sleep(time.Millisecond * 50)
 		runtime.Gosched()
 	}
-	ncurses.Endwin()
 	logInit(os.Stderr)
 }
 
