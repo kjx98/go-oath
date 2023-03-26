@@ -30,15 +30,17 @@ func printOtp(acct *account) []byte {
 
 func main() {
 	var acctJson string
+	var bOverWrite bool
 	// $DJI, $COMPX
 	flag.StringVar(&acctJson, "acct", "", "Accounts in JSON format")
+	flag.BoolVar(&bOverWrite, "force", false, "force overwrite acct db")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: authK [options]\n")
 		flag.PrintDefaults()
 		os.Exit(2)
 	}
 	flag.Parse()
-	accts := readAcct(acctJson)
+	accts := readAcct(acctJson, bOverWrite)
 	nSymbols := len(accts)
 	if nSymbols > MaxLines {
 		nSymbols = MaxLines
@@ -136,7 +138,7 @@ func main() {
 			break
 		}
 		if nowS := tNow.Unix(); !bFirst && nowS%oath.Interval != 0 {
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 200)
 			runtime.Gosched()
 			continue
 		} else {
@@ -150,7 +152,7 @@ func main() {
 			//w1.SetColor("wb")
 			w1.Write(printOtp(&accts[i]))
 		}
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(time.Millisecond * 200)
 		runtime.Gosched()
 	}
 	logInit(os.Stderr)
