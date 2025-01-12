@@ -141,8 +141,6 @@ func main() {
 			time.Sleep(time.Millisecond * 200)
 			runtime.Gosched()
 			continue
-		} else {
-			bFirst = false
 		}
 		for i := 0; i < nSymbols; i++ {
 			w1.Move(uint16(i), 0)
@@ -152,7 +150,11 @@ func main() {
 			//w1.SetColor("wb")
 			w1.Write(printOtp(&accts[i]))
 		}
-		time.Sleep(time.Millisecond * 200)
+		if bFirst {
+			bFirst = false
+		} else {
+			time.Sleep(time.Millisecond * 200)
+		}
 		runtime.Gosched()
 	}
 	logInit(os.Stderr)

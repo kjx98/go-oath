@@ -47,7 +47,7 @@ func (totp *Oath) Rfc(numb uint64) int {
 
 // return TOTP
 func (totp *Oath) Now() int {
-	tt := time.Now().UTC().Unix() / Interval
+	tt := time.Now().Unix() / Interval
 	return totp.Rfc(uint64(tt))
 }
 
